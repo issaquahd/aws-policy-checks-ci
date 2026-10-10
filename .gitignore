@@ -1,0 +1,11 @@
+# runtime outputs and local tooling state
+__pycache__/
+*.pyc
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+build/
+*.zip
+.DS_Store

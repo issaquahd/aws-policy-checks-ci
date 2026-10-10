@@ -1,0 +1,63 @@
+name: policy-checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  TOFU_VERSION: "1.13.1"
+
+jobs:
+  cfn-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install cfn-lint
+      - run: scripts/run-cfn-lint.sh
+
+  no-star-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: scripts/run-policy-checks.sh
+
+  opentofu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+          tofu_wrapper: false
+      - run: scripts/run-tofu-checks.sh
+
+  # OPTIONAL: IAM Access Analyzer validate-policy over OIDC.
+  # Off unless the repository variable ENABLE_ACCESS_ANALYZER is "true".
+  # Also set the repository variable AWS_ROLE_ARN (see README for the trust policy).
+  access-analyzer:
+    if: ${{ vars.ENABLE_ACCESS_ANALYZER == 'true' }}
+    needs: [cfn-lint, no-star-actions]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: policy-checks-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-2' }}
+      - run: scripts/validate-policies.sh

@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: GOOD sample. A read-only role scoped to one bucket with explicit actions.
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: Bucket the role may read.
+    AllowedPattern: "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$"
+
+Resources:
+  ReaderRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Lambda role that can only list and read one bucket.
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: read-one-bucket
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: ListBucket
+                Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub arn:${AWS::Partition}:s3:::${BucketName}
+              - Sid: ReadObjects
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource: !Sub arn:${AWS::Partition}:s3:::${BucketName}/*
+
+Outputs:
+  RoleArn:
+    Value: !GetAtt ReaderRole.Arn

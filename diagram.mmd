@@ -1,0 +1,20 @@
+flowchart LR
+  dev["Push / merge request"]
+  subgraph ci["GitHub Actions or GitLab CI"]
+    lint["cfn-lint<br/>all CloudFormation *.yaml"]
+    star["checks/no_star_actions.py<br/>+ unit tests"]
+    tofu["tofu fmt -check<br/>tofu init -backend=false<br/>tofu validate"]
+    aa["OPTIONAL access-analyzer job<br/>(ENABLE_ACCESS_ANALYZER=true)"]
+  end
+  oidc["OIDC token<br/>(GitHub / GitLab)"]
+  role["IAM role<br/>access-analyzer:ValidatePolicy only"]
+  api["IAM Access Analyzer<br/>validate-policy"]
+
+  dev --> lint
+  dev --> star
+  dev --> tofu
+  lint --> aa
+  star --> aa
+  aa -- "sts:AssumeRoleWithWebIdentity" --> oidc
+  oidc --> role
+  role --> api

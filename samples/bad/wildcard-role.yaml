@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  BAD sample, on purpose. Lint-clean CloudFormation that still grants "*" and
+  "s3:*". cfn-lint does not catch this; checks/no_star_actions.py does.
+  Kept outside templates/ so it never gates CI; the unit tests assert it is flagged.
+
+Resources:
+  WildcardRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Do not deploy. Demonstrates wildcard actions.
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: everything
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: AllActions
+                Effect: Allow
+                Action: "*"
+                Resource: "*"
+              - Sid: AllOfS3
+                Effect: Allow
+                Action: s3:*
+                Resource: "*"
