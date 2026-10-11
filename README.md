@@ -2,6 +2,8 @@
 
 Policy checks that run on every push, identically in **GitHub Actions** and **GitLab CI**, and that you can prove locally before you push.
 
+**Status:** linted and unit-tested offline. Not yet run against a live AWS account; this line changes when it has been.
+
 ## What it checks
 
 | Job | What runs | Gating paths |
