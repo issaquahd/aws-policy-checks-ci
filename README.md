@@ -65,7 +65,7 @@ There is nothing to deploy. Verification is `scripts/check-all.sh` locally or a 
 
 ## The learning
 
-Linters check that a template is well formed. They do not check that it is safe. A lint-clean template can still grant `"*"`. Put a cheap, unit-tested policy rule next to cfn-lint and `tofu validate` in the same pipeline, and prove it fails on a known-bad sample. Add Access Analyzer's validate-policy over OIDC when you want AWS's own policy grammar and security checks. That way no long-lived keys sit in CI.
+Linters check that a template is well formed, not that it is safe: a lint-clean template can still grant `"*"`. Put a cheap, unit-tested policy rule next to cfn-lint and `tofu validate` in the same pipeline, and prove it fails on a known-bad sample. Add Access Analyzer's validate-policy over OIDC when you want AWS's own policy grammar and security checks, with no long-lived keys in CI.
 
 ## Notes
 
